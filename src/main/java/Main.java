@@ -19,6 +19,10 @@ public class Main {
        serverSocket.setReuseAddress(true);
        // Wait for connection from client.
        clientSocket = serverSocket.accept();
+
+       // First 4 bytes: interprets it as an int32 → total message size (excluding those 4 bytes)
+       // Next 4 bytes: interprets it as correlation_id
+       clientSocket.getOutputStream().write(new byte[] {0, 0, 0, 0, 0, 0, 0, 7});
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
      } finally {
