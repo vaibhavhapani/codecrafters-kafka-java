@@ -38,6 +38,7 @@ public class Main {
          int correlationId = ByteBuffer.wrap(correlationIdBytes).getInt();
 
          ByteArrayOutputStream out = new ByteArrayOutputStream();
+         out.write(ByteBuffer.allocate(4).putInt(messageSize).array());
          out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
 
          clientSocket.getOutputStream().write(out.toByteArray());
