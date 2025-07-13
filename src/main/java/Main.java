@@ -1,5 +1,6 @@
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -41,11 +42,14 @@ public class Main {
          boolean isUnsupportedVersion = apiVersion < 0 || apiVersion > 4;
 
          ByteArrayOutputStream out = new ByteArrayOutputStream();
-         out.write(ByteBuffer.allocate(4).putInt(6).array()); // messageSize 6 = 4 for correlation ID + 2 for error code
-         out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
 
-         if(isUnsupportedVersion) out.write(ByteBuffer.allocate(2).putShort((short)35).array());
-         else out.write(ByteBuffer.allocate(2).putShort((short)0).array());
+        out.write(ByteBuffer.allocate(4).putInt(19).array()); // messageSize 6 = 4 for correlation ID + 2 for error code
+        out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
+
+         if(isUnsupportedVersion) out.write(ByteBuffer.allocate(2).putShort((short) 35).array());
+         else out.write(ByteBuffer.allocate(2).putShort((short) 0).array());
+
+       out.write(new byte[] {2, 00, 0x12, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0});
 
          clientSocket.getOutputStream().write(out.toByteArray());
 
