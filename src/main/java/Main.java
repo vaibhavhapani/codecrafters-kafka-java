@@ -43,15 +43,22 @@ public class Main {
 
          ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        out.write(ByteBuffer.allocate(4).putInt(19).array()); // messageSize 6 = 4 for correlation ID + 2 for error code
+        out.write(ByteBuffer.allocate(4).putInt(14).array()); // messageSize 6 = 4 for correlation ID + 2 for error code
         out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
 
          if(isUnsupportedVersion) out.write(ByteBuffer.allocate(2).putShort((short) 35).array());
          else out.write(ByteBuffer.allocate(2).putShort((short) 0).array());
 
-       out.write(new byte[] {2, 00, 0x12, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0});
+       out.write(new byte[] {
+               2,          // compact array length = 1 + 1
+               0x00, 0x12, // api_key = 18
+               0x00, 0x00, // min_version = 0
+               0x00, 0x04, // max_version = 4
+               0x00        // tagged_fields = empty
+       });
 
-         clientSocket.getOutputStream().write(out.toByteArray());
+
+       clientSocket.getOutputStream().write(out.toByteArray());
 
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
