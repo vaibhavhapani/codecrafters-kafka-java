@@ -1,6 +1,9 @@
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 public class Main {
   public static void main(String[] args){
@@ -22,7 +25,23 @@ public class Main {
 
        // First 4 bytes: interprets it as an int32 → total message size (excluding those 4 bytes)
        // Next 4 bytes: interprets it as correlation_id
-       clientSocket.getOutputStream().write(new byte[] {0, 0, 0, 0, 0, 0, 0, 7});
+
+         BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
+
+         byte[] messageSizeBytes = in.readNBytes(4);
+         int messageSize = ByteBuffer.wrap(messageSizeBytes).getInt();
+
+         byte[] apiKey = in.readNBytes(2);
+         byte[] apiVersion = in.readNBytes(2);
+         byte[] correlationIdBytes = in.readNBytes(4);
+
+         int correlationId = ByteBuffer.wrap(correlationIdBytes).getInt();
+
+         ByteArrayOutputStream out = new ByteArrayOutputStream();
+         out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
+
+         clientSocket.getOutputStream().write(out.toByteArray());
+
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
      } finally {
