@@ -43,7 +43,7 @@ public class Main {
 
          ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        out.write(ByteBuffer.allocate(4).putInt(14).array()); // messageSize 6 = 4 for correlation ID + 2 for error code
+        out.write(ByteBuffer.allocate(4).putInt(19).array()); // messageSize 6 = 4 for correlation ID + 2 for error code
         out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
 
          if(isUnsupportedVersion) out.write(ByteBuffer.allocate(2).putShort((short) 35).array());
