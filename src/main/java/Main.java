@@ -54,7 +54,9 @@ public class Main {
                0x00, 0x12, // api_key = 18
                0x00, 0x00, // min_version = 0
                0x00, 0x04, // max_version = 4
-               0x00        // tagged_fields = empty
+               0x00,        // tag buffer = empty
+               0x00, 0x00, 0x00, 0x00, // throttle time
+               0x00 // tage buffer
        });
 
 
