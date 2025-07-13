@@ -29,17 +29,23 @@ public class Main {
          BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
 
          byte[] messageSizeBytes = in.readNBytes(4);
-         int messageSize = ByteBuffer.wrap(messageSizeBytes).getInt();
-
-         byte[] apiKey = in.readNBytes(2);
-         byte[] apiVersion = in.readNBytes(2);
+         byte[] apiKeyBytes = in.readNBytes(2);
+         byte[] apiVersionBytes = in.readNBytes(2);
          byte[] correlationIdBytes = in.readNBytes(4);
 
+         int messageSize = ByteBuffer.wrap(messageSizeBytes).getInt();
+         short apiKey = ByteBuffer.wrap(apiKeyBytes).getShort();
+         short apiVersion = ByteBuffer.wrap(apiVersionBytes).getShort();
          int correlationId = ByteBuffer.wrap(correlationIdBytes).getInt();
 
+         boolean isUnsupportedVersion = apiVersion < 0 || apiVersion > 4;
+
          ByteArrayOutputStream out = new ByteArrayOutputStream();
-         out.write(ByteBuffer.allocate(4).putInt(messageSize).array());
+         out.write(ByteBuffer.allocate(4).putInt(6).array()); // messageSize 6 = 4 for correlation ID + 2 for error code
          out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
+
+         if(isUnsupportedVersion) out.write(ByteBuffer.allocate(2).putShort((short)35).array());
+         else out.write(ByteBuffer.allocate(2).putShort((short)0).array());
 
          clientSocket.getOutputStream().write(out.toByteArray());
 
