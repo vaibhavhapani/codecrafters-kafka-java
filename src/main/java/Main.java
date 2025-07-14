@@ -1,7 +1,4 @@
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -19,7 +16,26 @@ public class Main {
 
             // Wait for connection from client.
             clientSocket = serverSocket.accept();
-            BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());
+            handleClient(clientSocket);
+
+        } catch (IOException e) {
+            System.out.println("IOException: " + e.getMessage());
+        } finally {
+            try {
+                if (clientSocket != null) {
+                    clientSocket.close();
+                }
+                if (serverSocket != null) {
+                    serverSocket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("IOException: " + e.getMessage());
+            }
+        }
+    }
+
+    public static void handleClient(Socket clientSocket) {
+        try(BufferedInputStream in = new BufferedInputStream(clientSocket.getInputStream());) {
 
             // ADD THIS LOOP to handle multiple requests
             while (true) {
@@ -50,18 +66,18 @@ public class Main {
 
                     boolean isUnsupportedVersion = apiVersion < 0 || apiVersion > 4;
 
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    ByteArrayOutputStream res = new ByteArrayOutputStream();
 
-                    out.write(ByteBuffer.allocate(4).putInt(19).array()); // messageSize
-                    out.write(ByteBuffer.allocate(4).putInt(correlationId).array());
+                    res.write(ByteBuffer.allocate(4).putInt(19).array()); // messageSize
+                    res.write(ByteBuffer.allocate(4).putInt(correlationId).array());
 
                     if(isUnsupportedVersion) {
-                        out.write(ByteBuffer.allocate(2).putShort((short) 35).array());
+                        res.write(ByteBuffer.allocate(2).putShort((short) 35).array());
                     } else {
-                        out.write(ByteBuffer.allocate(2).putShort((short) 0).array());
+                        res.write(ByteBuffer.allocate(2).putShort((short) 0).array());
                     }
 
-                    out.write(new byte[] {
+                    res.write(new byte[] {
                             2,          // compact array length = 1 + 1
                             0x00, 0x12, // api_key = 18
                             0x00, 0x00, // min_version = 0
@@ -71,7 +87,7 @@ public class Main {
                             0x00 // tag buffer
                     });
 
-                    clientSocket.getOutputStream().write(out.toByteArray());
+                    clientSocket.getOutputStream().write(res.toByteArray());
                     clientSocket.getOutputStream().flush(); // Ensure data is sent immediately
 
                 } catch (IOException e) {
@@ -81,18 +97,7 @@ public class Main {
             }
 
         } catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
-        } finally {
-            try {
-                if (clientSocket != null) {
-                    clientSocket.close();
-                }
-                if (serverSocket != null) {
-                    serverSocket.close();
-                }
-            } catch (IOException e) {
-                System.out.println("IOException: " + e.getMessage());
-            }
+            System.err.println("Client handler error: " + e.getMessage());
         }
     }
 }
