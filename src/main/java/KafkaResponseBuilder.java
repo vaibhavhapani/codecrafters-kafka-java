@@ -13,7 +13,7 @@ public class KafkaResponseBuilder {
         res.write(ByteBuffer.allocate(2).putShort(errorCode).array());
 
         res.write(new byte[] {
-                4,           // Compact array length = 2 entries + 1 terminator
+                3,           // Compact array length = 2 entries + 1 terminator
 
                 // API Key 18: ApiVersions
                 0x00, 0x12,     // API Key = 18
