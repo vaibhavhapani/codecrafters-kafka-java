@@ -13,11 +13,20 @@ public class KafkaResponseBuilder {
         res.write(ByteBuffer.allocate(2).putShort(errorCode).array());
 
         res.write(new byte[] {
-                2,           // compact array length
-                0x00, 0x12,  // api_key = 18
-                0x00, 0x00,  // min_version = 0
-                0x00, 0x04,  // max_version = 4
-                0x00,        // tag buffer = empty
+                4,           // Compact array length = 2 entries + 1 terminator
+
+                // API Key 18: ApiVersions
+                0x00, 0x12,     // API Key = 18
+                0x00, 0x00,     // Min Version = 0
+                0x00, 0x04,     // Max Version = 4
+                0x00,           // Tag buffer
+
+                // API Key 75: DescribeTopicPartitions
+                0x00, 0x4B,     // API Key = 75
+                0x00, 0x00,     // Min Version = 0
+                0x00, 0x00,     // Max Version = 0
+                0x00,           // Tag buffer
+
                 0x00, 0x00, 0x00, 0x00, // throttle time
                 0x00         // tag buffer
         });
