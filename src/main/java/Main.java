@@ -8,29 +8,19 @@ public class Main {
         System.err.println("Logs from your program will appear here!");
 
         ServerSocket serverSocket = null;
-        Socket clientSocket = null;
         int port = 9092;
         try {
             serverSocket = new ServerSocket(port);
             serverSocket.setReuseAddress(true);
 
-            // Wait for connection from client.
-            clientSocket = serverSocket.accept();
-            handleClient(clientSocket);
+            while (true){
+                // Wait for connection from client.
+                Socket clientSocket = serverSocket.accept();
+                new Thread(() -> handleClient(clientSocket)).start();
+            }
 
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
-        } finally {
-            try {
-                if (clientSocket != null) {
-                    clientSocket.close();
-                }
-                if (serverSocket != null) {
-                    serverSocket.close();
-                }
-            } catch (IOException e) {
-                System.out.println("IOException: " + e.getMessage());
-            }
         }
     }
 
