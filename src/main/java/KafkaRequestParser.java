@@ -19,21 +19,22 @@ public class KafkaRequestParser {
     public static KafkaRequest parseDescribeTopicPartitionsRequest(ByteBuffer buffer, short apiKey, short apiVersion, int correlationId) {
         int clientIdLength = buffer.getShort();
         if (clientIdLength > 0) {
-            clientIdLength = clientIdLength - 1;
-            System.out.println("******************************************** hein jii  ******************************" + clientIdLength);
             buffer.position(buffer.position() + clientIdLength);
         }
+
+        buffer.get(); // skip tagg buffer before client Id
 
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;
 
-        System.out.println("*********************************************************************************" + topicArrayLength);
+        System.out.println("Topic array length is: " + topicArrayLength);
 
         List<String> topicNames = new ArrayList<>();
         for (int i = 0; i < topicArrayLength; i++) {
             int topicNameLength = buffer.get() & 0xFF; // unsigned byte
+            topicNameLength = topicNameLength - 1;
 
-            System.out.println("****************************************************************************  yo   " + topicNameLength);
+            System.out.println("Topic name length is: " + topicNameLength);
             byte[] topicNameBytes = new byte[topicNameLength];
             buffer.get(topicNameBytes);
             String topicName = new String(topicNameBytes);
@@ -41,6 +42,15 @@ public class KafkaRequestParser {
             topicNames.add(topicName);
 
             buffer.get(); // Skip tag buffer for topic
+        }
+
+        // Parse response_partition_limit (int32)
+        int responsePartitionLimit = buffer.getInt();
+
+        // Parse cursor (nullable bytes)
+        byte cursorLength = buffer.get();
+        if (cursorLength > 0) {
+            buffer.position(buffer.position() + cursorLength - 1);
         }
 
         return new KafkaRequest(apiKey, apiVersion, correlationId, topicNames);
