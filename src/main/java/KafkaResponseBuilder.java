@@ -84,8 +84,6 @@ public class KafkaResponseBuilder {
 //                // 8. Tag buffer
 //                res.write((byte) 0);
             }
-        } else {
-            res.write((byte) 1);
         }
 
 //        // Next cursor (nullable bytes) - null
