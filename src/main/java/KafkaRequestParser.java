@@ -18,16 +18,16 @@ public class KafkaRequestParser {
 
     public static KafkaRequest parseDescribeTopicPartitionsRequest(ByteBuffer buffer, short apiKey, short apiVersion, int correlationId){
         int clientIdLength = buffer.getShort();
+        clientIdLength = clientIdLength - 1;
         if(clientIdLength > 0) buffer.position(buffer.position() + clientIdLength);
 
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;
 
-        System.out.println("********************************************************************************************************************" + topicArrayLength);
-
         List<String> topicNames = new ArrayList<>();
         for(int i = 0; i < topicArrayLength; i++) {
             int topicNameLength = buffer.get() & 0xFF; // unsigned byte
+            topicArrayLength = topicNameLength - 1;
 
             byte[] topicNameBytes = new byte[topicNameLength];
             buffer.get(topicNameBytes);
