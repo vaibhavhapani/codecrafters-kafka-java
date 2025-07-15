@@ -16,16 +16,16 @@ public class ClientHandler implements Runnable {
             OutputStream out = clientSocket.getOutputStream();){
 
             while (true) {
-                byte[] messageSizeBytes = in.readNBytes(4);
-                if (messageSizeBytes.length < 4) break;
+                byte[] messageSizeBytes = in.readNBytes(KafkaConstants.INT32_SIZE);
+                if (messageSizeBytes.length < KafkaConstants.INT32_SIZE) break;
 
                 int messageSize = ByteBuffer.wrap(messageSizeBytes).getInt();
                 byte[] requestBody = in.readNBytes(messageSize);
 
                 KafkaRequest request = KafkaRequestParser.parse(requestBody);
-                byte[] responseBytes = KafkaResponseBuilder.buildApiVersionsResponse(request);
+                byte[] responseBytes = KafkaResponseBuilder.buildResponse(request);
 
-                out.write(ByteBuffer.allocate(4).putInt(responseBytes.length).array());
+                out.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(responseBytes.length).array());
                 out.write(responseBytes);
                 out.flush();
             }

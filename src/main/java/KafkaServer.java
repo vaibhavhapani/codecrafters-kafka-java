@@ -14,7 +14,7 @@ public class KafkaServer {
             serverSocket.setReuseAddress(true);
             System.out.println("Kafka server started on port " + port);
 
-            while(true) {
+            while (true) {
                 Socket clientSocket = serverSocket.accept();
                 new Thread(new ClientHandler(clientSocket)).start();
             }
