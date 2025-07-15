@@ -50,6 +50,9 @@ public class KafkaResponseBuilder {
 
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(request.correlationId).array());
 
+        // Tag buffer for response header (required for v0)
+        res.write((byte) 0);
+
         // Throttle time
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(0).array());
 
