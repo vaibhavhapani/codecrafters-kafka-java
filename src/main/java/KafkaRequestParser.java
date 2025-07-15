@@ -11,14 +11,18 @@ public class KafkaRequestParser {
         short apiVersion = buffer.getShort(); // 2 bytes
         int correlationId = buffer.getInt(); // 4 bytes
 
-        if(apiKey == 75) return parseDescribeTopicPartitionsRequest(buffer, apiKey, apiVersion, correlationId);
+        if (apiKey == 75) return parseDescribeTopicPartitionsRequest(buffer, apiKey, apiVersion, correlationId);
 
         return new KafkaRequest(apiKey, apiVersion, correlationId);
     }
 
-    public static KafkaRequest parseDescribeTopicPartitionsRequest(ByteBuffer buffer, short apiKey, short apiVersion, int correlationId){
+    public static KafkaRequest parseDescribeTopicPartitionsRequest(ByteBuffer buffer, short apiKey, short apiVersion, int correlationId) {
         int clientIdLength = buffer.getShort();
-        if(clientIdLength > 0) buffer.position(buffer.position() + clientIdLength);
+        if (clientIdLength > 0) {
+            clientIdLength = clientIdLength - 1;
+            System.out.println("******************************************** hein jii  ******************************" + clientIdLength);
+            buffer.position(buffer.position() + clientIdLength);
+        }
 
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;
@@ -26,7 +30,7 @@ public class KafkaRequestParser {
         System.out.println("*********************************************************************************" + topicArrayLength);
 
         List<String> topicNames = new ArrayList<>();
-        for(int i = 0; i < topicArrayLength; i++) {
+        for (int i = 0; i < topicArrayLength; i++) {
             int topicNameLength = buffer.get() & 0xFF; // unsigned byte
 
             System.out.println("****************************************************************************  yo   " + topicNameLength);
