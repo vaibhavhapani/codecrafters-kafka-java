@@ -18,7 +18,6 @@ public class KafkaRequestParser {
 
     public static KafkaRequest parseDescribeTopicPartitionsRequest(ByteBuffer buffer, short apiKey, short apiVersion, int correlationId){
         int clientIdLength = buffer.getShort();
-        clientIdLength = clientIdLength - 1;
         if(clientIdLength > 0) buffer.position(buffer.position() + clientIdLength);
 
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
