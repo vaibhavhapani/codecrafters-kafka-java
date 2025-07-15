@@ -78,19 +78,21 @@ public class KafkaResponseBuilder {
                 // 6. Partitions array (compact array) - empty for unknown topic
                 res.write((byte) 1);
 
-//                // 7. Topic authorized operations (int32)
-//                res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(Integer.MIN_VALUE).array());
-//
-//                // 8. Tag buffer
-//                res.write((byte) 0);
+                // 7. Topic authorized operations (int32)
+                res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(Integer.MIN_VALUE).array());
+
+                // 8. Tag buffer
+                res.write((byte) 0);
             }
+        } else {
+            res.write((byte) 1);
         }
 
-//        // Next cursor (nullable bytes) - null
-//        res.write((byte) 0); // A nullable field that can be used for pagination.
-//
-//        // Tag buffer
-//        res.write((byte) 0);
+        // Next cursor (nullable bytes) - null
+        res.write((byte) 0); // A nullable field that can be used for pagination.
+
+        // Tag buffer
+        res.write((byte) 0);
 
         return res.toByteArray();
     }
