@@ -38,7 +38,7 @@ public class KafkaRequestParser {
             byte[] topicNameBytes = new byte[topicNameLength];
             buffer.get(topicNameBytes);
             String topicName = new String(topicNameBytes);
-            System.out.println("************************** topic name **********************************" + topicName);
+            System.out.println("Topic name is: " + topicName);
             topicNames.add(topicName);
 
             buffer.get(); // Skip tag buffer for topic

@@ -92,7 +92,7 @@ public class KafkaResponseBuilder {
         }
 
         // Next cursor (nullable bytes) - null
-        res.write((byte) 0); // A nullable field that can be used for pagination.
+        res.write(0xff); // A nullable field that can be used for pagination.
 
         // Tag buffer
         res.write((byte) 0);
