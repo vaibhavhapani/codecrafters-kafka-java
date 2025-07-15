@@ -22,13 +22,13 @@ public class KafkaRequestParser {
         if(clientIdLength > 0) buffer.position(buffer.position() + clientIdLength);
 
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
+        topicArrayLength = topicArrayLength - 1;
 
         System.out.println("*********************************************************************************" + topicArrayLength);
 
         List<String> topicNames = new ArrayList<>();
         for(int i = 0; i < topicArrayLength; i++) {
             int topicNameLength = buffer.get() & 0xFF; // unsigned byte
-            topicNameLength = topicNameLength - 1;
 
             System.out.println("****************************************************************************  yo   " + topicNameLength);
             byte[] topicNameBytes = new byte[topicNameLength];
