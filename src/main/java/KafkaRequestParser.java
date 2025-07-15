@@ -24,14 +24,18 @@ public class KafkaRequestParser {
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;
 
+        System.out.println("*********************************************************************************" + topicArrayLength);
+
         List<String> topicNames = new ArrayList<>();
         for(int i = 0; i < topicArrayLength; i++) {
             int topicNameLength = buffer.get() & 0xFF; // unsigned byte
-            topicArrayLength = topicNameLength - 1;
+            topicNameLength = topicNameLength - 1;
 
+            System.out.println("****************************************************************************  yo   " + topicArrayLength);
             byte[] topicNameBytes = new byte[topicNameLength];
             buffer.get(topicNameBytes);
             String topicName = new String(topicNameBytes);
+            System.out.println("************************** topic name **********************************" + topicArrayLength);
             topicNames.add(topicName);
 
             buffer.get(); // Skip tag buffer for topic
