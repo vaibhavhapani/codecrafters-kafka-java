@@ -23,6 +23,8 @@ public class KafkaRequestParser {
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;
 
+        System.out.println("********************************************************************************************************************" + topicArrayLength);
+
         List<String> topicNames = new ArrayList<>();
         for(int i = 0; i < topicArrayLength; i++) {
             int topicNameLength = buffer.get() & 0xFF; // unsigned byte
