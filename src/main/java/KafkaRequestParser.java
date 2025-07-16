@@ -22,7 +22,7 @@ public class KafkaRequestParser {
             buffer.position(buffer.position() + clientIdLength);
         }
 
-        buffer.get(); // skip tagg buffer before client Id
+        buffer.get(); // skip tag buffer before client Id
 
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;

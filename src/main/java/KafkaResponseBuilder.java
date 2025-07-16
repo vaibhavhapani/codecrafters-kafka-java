@@ -23,24 +23,25 @@ public class KafkaResponseBuilder {
                 KafkaConstants.UNSUPPORTED_VERSION : KafkaConstants.ERROR_NONE;
         res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(errorCode).array());
 
-        res.write(new byte[]{
-                3,           // Compact array length = 2 entries + 1 terminator
+        res.write((byte) 3); // compact array length (actual length + 1)
 
-                // API Key 18: ApiVersions
-                KafkaConstants.API_VERSIONS,     // API Key = 18
-                KafkaConstants.API_VERSIONS_MIN_VERSION,     // Min Version = 0
-                KafkaConstants.API_VERSIONS_MAX_VERSION,     // Max Version = 4
-                KafkaConstants.EMPTY_TAG_BUFFER,           // Tag buffer
+        // API Key 18: ApiVersions
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.API_VERSIONS).array());
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.API_VERSIONS_MIN_VERSION).array());
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.API_VERSIONS_MAX_VERSION).array());
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
 
-                // API Key 75: DescribeTopicPartitions
-                KafkaConstants.DESCRIBE_TOPIC_PARTITIONS,     // API Key = 75
-                KafkaConstants.DESCRIBE_TOPIC_PARTITIONS_MIN_VERSION,     // Min Version = 0
-                KafkaConstants.DESCRIBE_TOPIC_PARTITIONS_MAX_VERSION,     // Max Version = 0
-                KafkaConstants.EMPTY_TAG_BUFFER,           // Tag buffer
+        // API Key 75: DescribeTopicPartitions
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.DESCRIBE_TOPIC_PARTITIONS).array());
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.DESCRIBE_TOPIC_PARTITIONS_MIN_VERSION).array());
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.DESCRIBE_TOPIC_PARTITIONS_MAX_VERSION).array());
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
 
-                KafkaConstants.DEFAULT_THROTTLE_TIME_MS, // throttle time
-                KafkaConstants.EMPTY_TAG_BUFFER         // tag buffer
-        });
+        // Throttle time (int32)
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(KafkaConstants.DEFAULT_THROTTLE_TIME_MS).array());
+
+        // Tag buffer
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
 
         return res.toByteArray();
     }
