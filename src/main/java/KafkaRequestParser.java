@@ -7,23 +7,25 @@ public class KafkaRequestParser {
     public static KafkaRequest parse(byte[] body) {
         ByteBuffer buffer = ByteBuffer.wrap(body);
 
+        // Read the header
         short apiKey = buffer.getShort(); // 2 bytes
         short apiVersion = buffer.getShort(); // 2 bytes
         int correlationId = buffer.getInt(); // 4 bytes
+        int clientIdLength = buffer.getShort(); // 2 bytes
 
+        if (clientIdLength > 0) {
+            buffer.position(buffer.position() + clientIdLength);
+        }
+
+        buffer.get(); // skip tag buffer
+
+        // parse request body based on apiKey
         if (apiKey == 75) return parseDescribeTopicPartitionsRequest(buffer, apiKey, apiVersion, correlationId);
 
         return new KafkaRequest(apiKey, apiVersion, correlationId);
     }
 
     public static KafkaRequest parseDescribeTopicPartitionsRequest(ByteBuffer buffer, short apiKey, short apiVersion, int correlationId) {
-        int clientIdLength = buffer.getShort();
-        if (clientIdLength > 0) {
-            buffer.position(buffer.position() + clientIdLength);
-        }
-
-        buffer.get(); // skip tag buffer before client Id
-
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;
 

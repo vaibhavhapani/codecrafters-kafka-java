@@ -62,31 +62,7 @@ public class KafkaResponseBuilder {
             res.write((byte) (topicNames.size() + 1)); // compact array length (1 byte)
 
             for (String topicName : topicNames) {
-                // 1. Error Code
-                res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.UNKNOWN_TOPIC_OR_PARTITION).array());
-
-                byte[] topicNameBytes = topicName.getBytes(); // topic name as a compact string
-
-                // 2. Topic Name Length
-                res.write((byte) (topicNameBytes.length + 1));
-
-                // 3. Topic Name content
-                res.write(topicNameBytes);
-
-                // 4. Topic ID (UUID) - 00000000-0000-0000-0000-000000000000
-                res.write(new byte[16]); // all zeros for unknown topic
-
-                // 5. Is internal (boolean)
-                res.write((byte) 0);
-
-                // 6. Partitions array (compact array) - empty for unknown topic
-                res.write((byte) 1);
-
-                // 7. Topic authorized operations (int32)
-                res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(Integer.MIN_VALUE).array());
-
-                // 8. Tag buffer
-                res.write((byte) 0);
+                writeResponse(res, topicName);
             }
         } else {
             res.write((byte) 1);
@@ -99,5 +75,122 @@ public class KafkaResponseBuilder {
         res.write((byte) 0);
 
         return res.toByteArray();
+    }
+
+    public static void writeResponse(ByteArrayOutputStream res, String topicName) throws IOException {
+
+        TopicMetadata topicMetadata = null;
+
+        try {
+            topicMetadata = ClusterMetadataReader.readTopicMetadata(topicName);
+        } catch (IOException e) {
+            System.err.println("Error reading metadata for " + topicName + ": " + e.getMessage());
+        }
+
+        if (topicMetadata != null) writeKnownTopicResponse(res, topicMetadata);
+        else writeUnknownTopicResponse(res, topicName);
+    }
+
+    public static void writeKnownTopicResponse(ByteArrayOutputStream res, TopicMetadata topicMetadata) throws IOException {
+        // 1. Error Code
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.ERROR_NONE).array());
+
+        byte[] topicNameBytes = topicMetadata.topicName.getBytes(); // topic name as a compact string
+
+        // 2. Topic Name Length
+        res.write((byte) (topicNameBytes.length + 1));
+
+        // 3. Topic Name content
+        res.write(topicNameBytes);
+
+        // 4. Topic ID (UUID)
+        res.write(topicMetadata.topicId); // all zeros for unknown topic
+
+        // 5. Is internal (boolean)
+        res.write((byte) 0);
+
+        // 6. Partitions array (compact array)
+        if (topicMetadata.partitions != null && !topicMetadata.partitions.isEmpty()) {
+            res.write((byte) (topicMetadata.partitions.size() + 1));
+
+            for (Integer partitionId : topicMetadata.partitions) {
+                writePartitionResponse(res, partitionId);
+            }
+        } else {
+            res.write((byte) 1);
+        }
+
+        // 7. Topic authorized operations (int32)
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(Integer.MIN_VALUE).array());
+
+        // 8. Tag buffer
+        res.write((byte) 0);
+    }
+
+    public static void writeUnknownTopicResponse(ByteArrayOutputStream res, String topicName) throws IOException {
+
+        // 1. Error Code
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.UNKNOWN_TOPIC_OR_PARTITION).array());
+
+        byte[] topicNameBytes = topicName.getBytes(); // topic name as a compact string
+
+        // 2. Topic Name Length
+        res.write((byte) (topicNameBytes.length + 1));
+
+        // 3. Topic Name content
+        res.write(topicNameBytes);
+
+        // 4. Topic ID (UUID) - 00000000-0000-0000-0000-000000000000
+        res.write(new byte[16]); // all zeros for unknown topic
+
+        // 5. Is internal (boolean)
+        res.write((byte) 0);
+
+        // 6. Partitions array (compact array) - empty for unknown topic
+        res.write((byte) 1);
+
+        // 7. Topic authorized operations (int32)
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(Integer.MIN_VALUE).array());
+
+        // 8. Tag buffer
+        res.write((byte) 0);
+    }
+
+    public static void writePartitionResponse(ByteArrayOutputStream res, Integer partitionId) throws IOException {
+        // Partition Error Code - NO_ERROR
+        res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.ERROR_NONE).array());
+
+        // Partition Index
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(partitionId).array());
+
+        // Leader ID - use -1 for no leader (simplified)
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(-1).array());
+
+        // Leader Epoch - use -1 (simplified)
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(-1).array());
+
+        // Replica Nodes - empty array (compact)
+        res.write((byte) 1);
+
+        // Replica Node
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(1).array());
+
+        // In-Sync Replica Nodes - empty array (compact)
+        res.write((byte) 1);
+
+        // ISR Node
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(1).array());
+
+        // Eligible Leader Replicas - empty array (compact)
+        res.write((byte) 1);
+
+        // Last Known Eligible Leader Replicas - empty array (compact)
+        res.write((byte) 1);
+
+        // Offline Replicas - empty array (compact)
+        res.write((byte) 1);
+
+        // Tag buffer
+        res.write((byte) 0);
     }
 }
