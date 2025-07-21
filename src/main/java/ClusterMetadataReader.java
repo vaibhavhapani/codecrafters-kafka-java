@@ -48,17 +48,17 @@ public class ClusterMetadataReader {
             for (int record = 0; record < recordsCount && buffer.position() < batchEnd; record++) {
                 if (buffer.remaining() < 1) break;
 
-                int recordLength = buffer.get();
+                int recordLength = buffer.get() & 0xFF;
                 int recordEnd = buffer.position() + recordLength;
                 System.out.println("length: " + recordLength);
 
-                if (recordEnd > batchEnd || recordLength < 0) {
+                if (recordEnd > batchEnd) {
                     System.out.println("Invalid record length: " + recordLength);
                     break;
                 }
 
                 // attributes
-                int attributes = buffer.get();
+                int attributes = buffer.get() & 0xFF;
                 System.out.println("Attributes: " + attributes);
 
                 // timestamp delta

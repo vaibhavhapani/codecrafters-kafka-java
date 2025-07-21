@@ -29,19 +29,22 @@ public class KafkaRequestParser {
         int topicArrayLength = buffer.get() & 0xFF; // unsigned byte
         topicArrayLength = topicArrayLength - 1;
 
-        System.out.println("Topic array length is: " + topicArrayLength);
+        System.out.println("Request: Topic array length is: " + topicArrayLength);
 
         List<String> topicNames = new ArrayList<>();
         for (int i = 0; i < topicArrayLength; i++) {
             int topicNameLength = buffer.get() & 0xFF; // unsigned byte
             topicNameLength = topicNameLength - 1;
 
-            System.out.println("Topic name length is: " + topicNameLength);
+            System.out.println("Request: Topic name length is: " + topicNameLength);
+
             byte[] topicNameBytes = new byte[topicNameLength];
             buffer.get(topicNameBytes);
             String topicName = new String(topicNameBytes);
-            System.out.println("Topic name is: " + topicName);
+
             topicNames.add(topicName);
+
+            System.out.println("Request: Topic name is: " + topicName);
 
             buffer.get(); // Skip tag buffer for topic
         }
@@ -54,6 +57,8 @@ public class KafkaRequestParser {
         if (cursorLength > 0) {
             buffer.position(buffer.position() + cursorLength - 1);
         }
+
+        System.out.println("\n***************** Request Parsed *********************\n");
 
         return new KafkaRequest(apiKey, apiVersion, correlationId, topicNames);
     }
