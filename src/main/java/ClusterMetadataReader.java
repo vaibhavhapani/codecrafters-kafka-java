@@ -48,7 +48,9 @@ public class ClusterMetadataReader {
             for (int record = 0; record < recordsCount && buffer.position() < batchEnd; record++) {
                 if (buffer.remaining() < 1) break;
 
-                int recordLength = buffer.get() & 0xFF;
+                byte b = buffer.get();
+                int recordLength = b;
+                System.out.printf("0x%02X", b & 0xFF);
                 int recordEnd = buffer.position() + recordLength;
                 System.out.println("length: " + recordLength);
 
