@@ -48,9 +48,8 @@ public class ClusterMetadataReader {
             for (int record = 0; record < recordsCount && buffer.position() < batchEnd; record++) {
                 if (buffer.remaining() < 1) break;
 
-                byte b = buffer.get();
-                int recordLength = b;
-                System.out.printf("0x%02X", b & 0xFF);
+
+                int recordLength = zigZagDecodeByte(buffer.get());
                 int recordEnd = buffer.position() + recordLength;
                 System.out.println("length: " + recordLength);
 
@@ -59,24 +58,12 @@ public class ClusterMetadataReader {
                     break;
                 }
 
-                // attributes
                 int attributes = buffer.get() & 0xFF;
-                System.out.println("Attributes: " + attributes);
+                int timeStampDelta = zigZagDecodeByte(buffer.get());
+                int offsetDelta = zigZagDecodeByte(buffer.get());
+                int keyLength = zigZagDecodeByte(buffer.get());
 
-                // timestamp delta
-                byte timeStampDeltaSignedByte = buffer.get();
-                int timeStampDelta = timeStampDeltaSignedByte;
-                System.out.println("Timestamp Delta signed byte and int: " + timeStampDeltaSignedByte + " " + timeStampDelta);
-
-                // offset delta
-                byte offsetDeltaSignedByte = buffer.get();
-                int offsetDelta = offsetDeltaSignedByte;
-                System.out.println("Offset Delta signed byte and int: " + offsetDeltaSignedByte + " " + offsetDelta);
-
-                byte keyLengthSignedByte = buffer.get();
-                int keyLength = keyLengthSignedByte;
-                if (keyLength != -1) keyLength = keyLengthSignedByte & 0xFF;
-                System.out.println("Key Length: " + keyLength);
+                System.out.println("Attributes: " + attributes + "\nTimestamp Delta" + timeStampDelta + "\nOffset Delta: " + offsetDelta + "\nKey Length: " + keyLength);
 
                 byte[] keyBytes;
                 String key = null;
@@ -89,8 +76,8 @@ public class ClusterMetadataReader {
                     System.out.println("Key: " + key);
                 }
 
-                byte valueLengthSignedByte = buffer.get();
-                int valueLength = valueLengthSignedByte;
+                int valueLength = zigZagDecodeByte(buffer.get());
+                ;
                 System.out.println("Value length: " + valueLength);
 
                 // Value
@@ -116,7 +103,7 @@ public class ClusterMetadataReader {
                         byte[] topicUUID = new byte[16];
                         buffer.get(topicUUID);
 
-                        if(topicName.equals(currentTopicName)) {
+                        if (topicName.equals(currentTopicName)) {
                             foundTopicName = currentTopicName;
                             topicId = topicUUID;
                         }
@@ -136,7 +123,7 @@ public class ClusterMetadataReader {
                         byte[] partitionTopicUUID = new byte[16];
                         buffer.get(partitionTopicUUID);
 
-                        if(topicId != null && Arrays.equals(topicId, partitionTopicUUID)) {
+                        if (topicId != null && Arrays.equals(topicId, partitionTopicUUID)) {
                             partitions.add(partitionId);
                         }
 
@@ -154,8 +141,13 @@ public class ClusterMetadataReader {
             buffer.position(batchEnd);
             System.out.println("\n********************** Batch Over ************************\n");
         }
-        if(foundTopicName != null) return new TopicMetadata(foundTopicName, topicId, partitions);
+        if (foundTopicName != null) return new TopicMetadata(foundTopicName, topicId, partitions);
 
         return null;
+    }
+
+    public static int zigZagDecodeByte(byte b) {
+        int unsigned = b & 0xFF;
+        return (unsigned >>> 1) ^ -(unsigned & 1);
     }
 }
