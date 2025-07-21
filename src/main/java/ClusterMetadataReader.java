@@ -51,7 +51,7 @@ public class ClusterMetadataReader {
 
                 int recordLength = zigZagDecodeByte(buffer.get());
                 int recordEnd = buffer.position() + recordLength;
-                System.out.println("length: " + recordLength);
+                System.out.println("Record Length: " + recordLength + "\nRecord End: " + recordEnd);
 
                 if (recordEnd > batchEnd) {
                     System.out.println("Invalid record length: " + recordLength);
@@ -77,7 +77,6 @@ public class ClusterMetadataReader {
                 }
 
                 int valueLength = zigZagDecodeByte(buffer.get());
-                ;
                 System.out.println("Value length: " + valueLength);
 
                 // Value
@@ -103,6 +102,8 @@ public class ClusterMetadataReader {
                         byte[] topicUUID = new byte[16];
                         buffer.get(topicUUID);
 
+                        System.out.println("Topic UUID: " + bytesToHex(topicUUID));
+
                         if (topicName.equals(currentTopicName)) {
                             foundTopicName = currentTopicName;
                             topicId = topicUUID;
@@ -115,13 +116,14 @@ public class ClusterMetadataReader {
 
                     case KafkaConstants.PARTITION_RECORD:
                         int partitionRecordVersion = buffer.get() & 0xFF;
-                        System.out.println("Version: " + partitionRecordVersion);
-
                         int partitionId = buffer.getInt();
-                        System.out.println("Partition Id: " + partitionId);
+
+                        System.out.println("Version: " + partitionRecordVersion + "\nPartition Id: " + partitionId);
 
                         byte[] partitionTopicUUID = new byte[16];
                         buffer.get(partitionTopicUUID);
+
+                        System.out.println("Partition topic UUID: " + bytesToHex(partitionTopicUUID));
 
                         if (topicId != null && Arrays.equals(topicId, partitionTopicUUID)) {
                             partitions.add(partitionId);
@@ -141,7 +143,10 @@ public class ClusterMetadataReader {
             buffer.position(batchEnd);
             System.out.println("\n********************** Batch Over ************************\n");
         }
-        if (foundTopicName != null) return new TopicMetadata(foundTopicName, topicId, partitions);
+        if (foundTopicName != null) {
+            System.out.println("Final result - Topic: " + foundTopicName + ", Partitions: " + partitions.size());
+            return new TopicMetadata(foundTopicName, topicId, partitions);
+        }
 
         return null;
     }
@@ -149,5 +154,13 @@ public class ClusterMetadataReader {
     public static int zigZagDecodeByte(byte b) {
         int unsigned = b & 0xFF;
         return (unsigned >>> 1) ^ -(unsigned & 1);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+        return result.toString();
     }
 }
