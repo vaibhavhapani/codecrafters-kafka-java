@@ -47,7 +47,7 @@ public class ClusterMetadataReader {
 
             for (int record = 0; record < recordsCount && buffer.position() < batchEnd; record++) {
                 if (buffer.remaining() < 1) break;
-                System.out.println("*********** Batch " + record + " ***********");
+                System.out.println("*********** Batch " + record+1 + " ***********");
 
                 int recordLength = zigZagDecodeByte(buffer.get());
                 int recordEnd = buffer.position() + recordLength;
