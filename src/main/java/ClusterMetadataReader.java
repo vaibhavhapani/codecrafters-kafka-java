@@ -73,7 +73,7 @@ public class ClusterMetadataReader {
                     keyBytes = new byte[keyLength];
                     buffer.get(keyBytes);
                     key = new String(keyBytes);
-                    System.out.println("Key: " + key + ".");
+                    System.out.println("Key: " + key);
                 }
 
                 int valueLength = zigZagDecodeByte(buffer.get());
