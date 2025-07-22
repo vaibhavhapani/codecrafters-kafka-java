@@ -42,12 +42,12 @@ public class ClusterMetadataReader {
             buffer.getInt(); // base sequence (4 bytes)
 
             int recordsCount = buffer.getInt(); // Records Length -> 4 bytes
-            System.out.println("Processing batch with " + recordsCount + " records");
+            System.out.println("Processing batch with " + recordsCount + " records\n");
 
 
             for (int record = 0; record < recordsCount && buffer.position() < batchEnd; record++) {
                 if (buffer.remaining() < 1) break;
-
+                System.out.println("*********** Batch " + record + " ***********");
 
                 int recordLength = zigZagDecodeByte(buffer.get());
                 int recordEnd = buffer.position() + recordLength;
@@ -63,7 +63,7 @@ public class ClusterMetadataReader {
                 int offsetDelta = zigZagDecodeByte(buffer.get());
                 int keyLength = zigZagDecodeByte(buffer.get());
 
-                System.out.println("Attributes: " + attributes + "\nTimestamp Delta" + timeStampDelta + "\nOffset Delta: " + offsetDelta + "\nKey Length: " + keyLength);
+                System.out.println("Attributes: " + attributes + "\nTimestamp Delta: " + timeStampDelta + "\nOffset Delta: " + offsetDelta + "\nKey Length: " + keyLength);
 
                 byte[] keyBytes;
                 String key = null;
@@ -73,7 +73,7 @@ public class ClusterMetadataReader {
                     keyBytes = new byte[keyLength];
                     buffer.get(keyBytes);
                     key = new String(keyBytes);
-                    System.out.println("Key: " + key);
+                    System.out.println("Key: " + key + ".");
                 }
 
                 int valueLength = zigZagDecodeByte(buffer.get());

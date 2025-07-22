@@ -129,7 +129,6 @@ public class KafkaResponseBuilder {
     }
 
     public static void writeUnknownTopicResponse(ByteArrayOutputStream res, String topicName) throws IOException {
-
         // 1. Error Code
         res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.UNKNOWN_TOPIC_OR_PARTITION).array());
 
