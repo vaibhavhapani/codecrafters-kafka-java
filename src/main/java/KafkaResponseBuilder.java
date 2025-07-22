@@ -74,9 +74,6 @@ public class KafkaResponseBuilder {
         // Tag buffer
         res.write((byte) 0);
 
-        System.out.println("\nBugger: ");
-        ClusterMetadataReader.partitionsData();
-
         return res.toByteArray();
     }
 
