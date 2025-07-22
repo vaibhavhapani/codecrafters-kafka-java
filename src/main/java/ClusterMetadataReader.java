@@ -143,6 +143,7 @@ public class ClusterMetadataReader {
             buffer.position(batchEnd);
             System.out.println("\n********************** Batch Over ************************\n");
         }
+
         if (foundTopicName != null) {
             System.out.println("Final result - Topic: " + foundTopicName + ", Partitions: " + partitions.size());
             return new TopicMetadata(foundTopicName, topicId, partitions);
