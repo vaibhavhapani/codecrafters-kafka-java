@@ -51,7 +51,7 @@ public class ClusterMetadataReader {
 
                 int recordLength = zigZagDecodeByte(buffer.get());
                 int recordEnd = buffer.position() + recordLength;
-                System.out.println("Record Length: " + recordLength + "\nRecord End: " + recordEnd);
+                System.out.println("Record Length: " + recordLength + "\nRecord Start: " + buffer.position() + "\nRecord End: " + recordEnd);
 
                 if (recordEnd > batchEnd) {
                     System.out.println("Invalid record length: " + recordLength);
