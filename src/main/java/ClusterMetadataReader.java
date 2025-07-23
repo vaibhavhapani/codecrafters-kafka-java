@@ -53,7 +53,7 @@ public class ClusterMetadataReader {
                 if (buffer.remaining() < 1) break;
                 System.out.println("*********** Record " + (record + 1) + " ***********" + "\nRecord Start: " + buffer.position());
 
-                int recordLength = zigZagDecodeByte(buffer.get());
+                int recordLength = readVarint(buffer);
                 int recordEnd = buffer.position() + recordLength;
                 System.out.println("Record Length: " + recordLength + "\nRecord End: " + recordEnd);
 
@@ -64,9 +64,9 @@ public class ClusterMetadataReader {
                 }
 
                 int attributes = buffer.get() & 0xFF;
-                int timeStampDelta = zigZagDecodeByte(buffer.get());
-                int offsetDelta = zigZagDecodeByte(buffer.get());
-                int keyLength = zigZagDecodeByte(buffer.get());
+                int timeStampDelta = readVarint(buffer);
+                int offsetDelta = readVarint(buffer);
+                int keyLength = readVarint(buffer);
 
                 System.out.println("Attributes: " + attributes + "\nTimestamp Delta: " + timeStampDelta + "\nOffset Delta: " + offsetDelta + "\nKey Length: " + keyLength);
 
@@ -177,9 +177,16 @@ public class ClusterMetadataReader {
         return null;
     }
 
-    public static int zigZagDecodeByte(byte b) {
-        int unsigned = b & 0xFF;
-        return (unsigned >>> 1) ^ -(unsigned & 1);
+    public static int readVarint(ByteBuffer buffer) {
+        int value = 0;
+        int shift = 0;
+        byte b;
+        do {
+            b = buffer.get();
+            value |= (b & 0x7F) << shift;
+            shift += 7;
+        } while ((b & 0x80) != 0);
+        return (value >>> 1) ^ -(value & 1); // ZigZag decode
     }
 
     private static String bytesToHex(byte[] bytes) {
