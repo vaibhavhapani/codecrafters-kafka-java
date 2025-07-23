@@ -157,37 +157,29 @@ public class KafkaResponseBuilder {
     }
 
     public static void writePartitionResponse(ByteArrayOutputStream res, Integer partitionId) throws IOException {
-        // Partition Error Code - NO_ERROR
+        // Partition Error Code
         res.write(ByteBuffer.allocate(KafkaConstants.INT16_SIZE).putShort(KafkaConstants.ERROR_NONE).array());
 
         // Partition Index
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(partitionId).array());
 
-        // Leader ID - use -1 for no leader (simplified)
-        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(-1).array());
+        // Leader Info
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(-1).array()); // leader_id
+        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(-1).array()); // leader_epoch
 
-        // Leader Epoch - use -1 (simplified)
-        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(-1).array());
+        // Replica Nodes (empty array)
+        res.write((byte) 1); // compact array size (0 + 1)
 
-        // Replica Nodes - empty array (compact)
+        // In-Sync Replica Nodes (empty array)
         res.write((byte) 1);
 
-        // Replica Node
-        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(1).array());
-
-        // In-Sync Replica Nodes - empty array (compact)
+        // Eligible Leader Replicas (empty array)
         res.write((byte) 1);
 
-        // ISR Node
-        res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(1).array());
-
-        // Eligible Leader Replicas - empty array (compact)
+        // Last Known ELR (empty array)
         res.write((byte) 1);
 
-        // Last Known Eligible Leader Replicas - empty array (compact)
-        res.write((byte) 1);
-
-        // Offline Replicas - empty array (compact)
+        // Offline Replicas (empty array)
         res.write((byte) 1);
 
         // Tag buffer
