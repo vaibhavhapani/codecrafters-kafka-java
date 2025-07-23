@@ -184,7 +184,7 @@ public class ClusterMetadataReader {
     private static String bytesToHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
-            result.append(String.format("%02x", b));
+            result.append(String.format("%02x ", b));
         }
         return result.toString();
     }
