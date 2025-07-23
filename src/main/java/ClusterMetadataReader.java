@@ -52,7 +52,12 @@ public class ClusterMetadataReader {
                 System.out.println("*********** Record " + (record + 1) + " ***********");
 
                 int recordLength = zigZagDecodeByte(buffer.get());
-                if(recordLength == 0) recordLength = zigZagDecodeByte(buffer.get()); // this is wrong, adding just to check out a scenario
+                if (recordLength == 0) {
+                    byte[] problematicBytes = new byte[Math.min(32, buffer.remaining())];
+                    buffer.get(problematicBytes);
+                    System.out.println("\nProblematic record data: " + bytesToHex(problematicBytes));
+                    recordLength = zigZagDecodeByte(buffer.get());
+                } // this is wrong, adding just to check out a scenario
                 int recordEnd = buffer.position() + recordLength;
                 System.out.println("Record Length: " + recordLength + "\nRecord Start: " + buffer.position() + "\nRecord End: " + recordEnd);
 
