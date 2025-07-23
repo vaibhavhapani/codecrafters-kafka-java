@@ -18,6 +18,7 @@ public class ClusterMetadataReader {
         List<Integer> partitions = new ArrayList<>();
 
         while (buffer.remaining() > 0) {
+            System.out.println("\n********************** Batch start at" + buffer.position() + "************************\n");
             long baseOffset = buffer.getLong(); // Base Offset
             int batchLength = buffer.getInt(); // Batch Length
             System.out.println("Batch Length: " + batchLength);
@@ -47,7 +48,7 @@ public class ClusterMetadataReader {
 
             for (int record = 0; record < recordsCount && buffer.position() < batchEnd; record++) {
                 if (buffer.remaining() < 1) break;
-                System.out.println("*********** Batch " + (record+1) + " ***********");
+                System.out.println("*********** Record " + (record+1) + " ***********");
 
                 int recordLength = zigZagDecodeByte(buffer.get());
                 int recordEnd = buffer.position() + recordLength;
@@ -141,7 +142,7 @@ public class ClusterMetadataReader {
                 System.out.println();
             }
             buffer.position(batchEnd);
-            System.out.println("\n********************** Batch Over ************************\n");
+            System.out.println("\n********************** Batch Over at" + (buffer.position()-1) + "************************\n");
         }
 
         if (foundTopicName != null) {
