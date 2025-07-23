@@ -152,6 +152,14 @@ public class ClusterMetadataReader {
                         break;
                 }
 
+                if(topicId != null) {
+                    int start = buffer.position();
+                    byte[] b = new byte[buffer.remaining()];
+                    buffer.get(b);
+                    buffer.position(start);
+                    System.out.println(bytesToHex(b));
+                }
+
                 System.out.println();
             }
             buffer.position(batchEnd);
