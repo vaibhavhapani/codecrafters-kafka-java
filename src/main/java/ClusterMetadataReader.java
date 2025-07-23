@@ -29,7 +29,7 @@ public class ClusterMetadataReader {
 
             System.out.println("\n********************** Batch " + (i + 1) + " starts at " + buffer.position() + " ************************\n" + "\nBatch Length: " + batchLength);
 
-            int batchEnd = buffer.position() + batchLength;
+            int batchEnd = buffer.position() + batchLength-1;
 
             // Skip batch header fields we don't need
             buffer.getInt(); // partition leader epoch (4 bytes)
@@ -52,8 +52,7 @@ public class ClusterMetadataReader {
                 System.out.println("*********** Record " + (record + 1) + " ***********");
 
                 int recordLength = zigZagDecodeByte(buffer.get());
-                if(recordLength == 0) recordLength = zigZagDecodeByte(buffer.get()); // this is wrong, adding just to check out a scenario
-                int recordEnd = buffer.position() + recordLength;
+                int recordEnd = buffer.position() + recordLength-1;
                 System.out.println("Record Length: " + recordLength + "\nRecord Start: " + buffer.position() + "\nRecord End: " + recordEnd);
 
                 if (recordLength <= 0 || recordEnd > batchEnd) {
@@ -130,6 +129,7 @@ public class ClusterMetadataReader {
                         System.out.println("Partition topic UUID: " + bytesToHex(partitionTopicUUID));
 
                         if (topicId != null && Arrays.equals(topicId, partitionTopicUUID)) {
+                            System.out.printf("MATCH! Adding partition %d to topic %s%n", partitionId, foundTopicName);
                             partitions.add(partitionId);
                         }
 
