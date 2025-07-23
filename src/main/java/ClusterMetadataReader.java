@@ -81,7 +81,7 @@ public class ClusterMetadataReader {
                     System.out.println("Key: " + key);
                 }
 
-                int valueLength = buffer.getShort();
+                int valueLength = readVarint(buffer);
                 System.out.println("Value length: " + valueLength);
 
                 if (valueLength <= 0) {
