@@ -19,15 +19,15 @@ public class ClusterMetadataReader {
 
         int i = 0;
         while (buffer.remaining() > 0) {
-            System.out.println("\n********************** Batch " + (i+1) + " starts at " + buffer.position() + " ************************\n");
             long baseOffset = buffer.getLong(); // Base Offset
             int batchLength = buffer.getInt(); // Batch Length
-            System.out.println("Batch Length: " + batchLength);
 
             if (batchLength <= 0 || batchLength > buffer.remaining()) {
                 System.out.println("Invalid batch length: " + batchLength + ", remaining: " + buffer.remaining());
                 break;
             }
+
+            System.out.println("\n********************** Batch " + (i + 1) + " starts at " + buffer.position() + " ************************\n" + "\nBatch Length: " + batchLength);
 
             int batchEnd = buffer.position() + batchLength;
 
@@ -49,14 +49,15 @@ public class ClusterMetadataReader {
 
             for (int record = 0; record < recordsCount && buffer.position() < batchEnd; record++) {
                 if (buffer.remaining() < 1) break;
-                System.out.println("*********** Record " + (record+1) + " ***********");
+                System.out.println("*********** Record " + (record + 1) + " ***********");
 
                 int recordLength = zigZagDecodeByte(buffer.get());
                 int recordEnd = buffer.position() + recordLength;
                 System.out.println("Record Length: " + recordLength + "\nRecord Start: " + buffer.position() + "\nRecord End: " + recordEnd);
 
-                if (recordEnd > batchEnd) {
-                    System.out.println("Invalid record length: " + recordLength);
+                if (recordLength <= 0 || recordEnd > batchEnd) {
+                    System.out.println("Invalid record length: " + recordLength + ", remaining: " + (batchEnd - buffer.position()));
+                    buffer.position(batchEnd);
                     break;
                 }
 
@@ -143,7 +144,7 @@ public class ClusterMetadataReader {
                 System.out.println();
             }
             buffer.position(batchEnd);
-            System.out.println("\n********************** Batch " + (i+1) + " Over at " + (buffer.position()-1) + " ************************\n");
+            System.out.println("\n********************** Batch " + (i + 1) + " Over at " + (buffer.position() - 1) + " ************************\n");
             i++;
         }
 
