@@ -17,6 +17,12 @@ public class ClusterMetadataReader {
         byte[] topicId = null;
         List<Integer> partitions = new ArrayList<>();
 
+        int start = buffer.position();
+        byte[] metadataBytes = new byte[Math.min(32, buffer.remaining())];
+        buffer.get(metadataBytes);
+        System.out.println("\nmetadata: " + bytesToHex(metadataBytes) + "\n");
+        buffer.position(start);
+
         int i = 0;
         while (buffer.remaining() > 0) {
             long baseOffset = buffer.getLong(); // Base Offset
@@ -52,14 +58,7 @@ public class ClusterMetadataReader {
                 System.out.println("*********** Record " + (record + 1) + " ***********");
 
                 int recordLength = zigZagDecodeByte(buffer.get());
-                if (recordLength == 0) {
-                    int start = buffer.position();
-                    byte[] problematicBytes = new byte[Math.min(32, buffer.remaining())];
-                    buffer.get(problematicBytes);
-                    System.out.println("\nProblematic record data: " + bytesToHex(problematicBytes));
-                    buffer.position(start);
-                    recordLength = zigZagDecodeByte(buffer.get());
-                } // this is wrong, adding just to check out a scenario
+                if(recordLength == 0) recordLength = zigZagDecodeByte(buffer.get()); // this is wrong, adding just to check out a scenario
                 int recordEnd = buffer.position() + recordLength;
                 System.out.println("Record Length: " + recordLength + "\nRecord Start: " + buffer.position() + "\nRecord End: " + recordEnd);
 
@@ -160,6 +159,10 @@ public class ClusterMetadataReader {
             System.out.println("Final result - Topic: " + foundTopicName + ", Partitions: " + partitions.size());
             return new TopicMetadata(foundTopicName, topicId, partitions);
         }
+
+        String s = new String(metadataBytes);
+        String id = new String(topicId);
+        System.out.println("Check: " + s.contains(id));
 
         return null;
     }
