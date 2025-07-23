@@ -123,7 +123,7 @@ public class ClusterMetadataReader {
                         int taggedFieldsCount = buffer.get() & 0xFF;
                         int headersArrayCount = buffer.get() & 0xFF;
 
-                        buffer.position(recordEnd-1);
+                        buffer.position(recordEnd);
                         break;
 
                     case KafkaConstants.PARTITION_RECORD:
