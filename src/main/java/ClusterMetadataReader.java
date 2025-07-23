@@ -123,6 +123,8 @@ public class ClusterMetadataReader {
                         int taggedFieldsCount = buffer.get() & 0xFF;
                         int headersArrayCount = buffer.get() & 0xFF;
 
+                        System.out.println(buffer.position());
+
                         buffer.position(recordEnd);
                         break;
 
