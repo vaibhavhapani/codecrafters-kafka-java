@@ -31,6 +31,7 @@ public final class KafkaConstants {
 
     // Kafka response defaults
     public static final int DEFAULT_THROTTLE_TIME_MS = 0; // 0x00, 0x00, 0x00, 0x00
+    public static final byte EMPTY_COMPACT_ARRAY = 1;
 
     // Tag buffer
     public static final byte EMPTY_TAG_BUFFER = 0x00;

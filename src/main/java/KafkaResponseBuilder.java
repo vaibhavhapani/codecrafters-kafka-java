@@ -52,7 +52,7 @@ public class KafkaResponseBuilder {
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(request.correlationId).array());
 
         // Tag buffer for response header (required for v0)
-        res.write((byte) 0);
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
 
         // Throttle time
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(0).array());
@@ -65,14 +65,14 @@ public class KafkaResponseBuilder {
                 writeResponse(res, topicName);
             }
         } else {
-            res.write((byte) 1);
+            res.write(KafkaConstants.EMPTY_COMPACT_ARRAY);
         }
 
         // Next cursor (nullable bytes) - null
         res.write(0xff); // A nullable field that can be used for pagination.
 
         // Tag buffer
-        res.write((byte) 0);
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
 
         return res.toByteArray();
     }
@@ -80,10 +80,14 @@ public class KafkaResponseBuilder {
     public static void writeResponse(ByteArrayOutputStream res, String topicName) throws IOException {
 
         TopicMetadata topicMetadata = null;
-
+        System.out.println("Processing request for topic: " + topicName);
         try {
             topicMetadata = ClusterMetadataReader.readTopicMetadata(topicName);
-            System.out.println("Response builder - Topic name: " + topicMetadata.topicName + ", Partitions: " + topicMetadata.partitions.size());
+            if (topicMetadata != null) {
+                System.out.println("Response builder - Topic name: " + topicMetadata.topicName + ", Partitions: " + topicMetadata.partitions.size());
+            } else {
+                System.out.println("Topic not found: " + topicName);
+            }
         } catch (IOException e) {
             System.err.println("Error reading metadata for " + topicName + ": " + e.getMessage());
         }
@@ -118,14 +122,14 @@ public class KafkaResponseBuilder {
                 writePartitionResponse(res, partitionId);
             }
         } else {
-            res.write((byte) 1);
+            res.write(KafkaConstants.EMPTY_COMPACT_ARRAY);
         }
 
         // 7. Topic authorized operations (int32)
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(Integer.MIN_VALUE).array());
 
         // 8. Tag buffer
-        res.write((byte) 0);
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
     }
 
     public static void writeUnknownTopicResponse(ByteArrayOutputStream res, String topicName) throws IOException {
@@ -144,16 +148,16 @@ public class KafkaResponseBuilder {
         res.write(new byte[16]); // all zeros for unknown topic
 
         // 5. Is internal (boolean)
-        res.write((byte) 0);
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
 
         // 6. Partitions array (compact array) - empty for unknown topic
-        res.write((byte) 1);
+        res.write(KafkaConstants.EMPTY_COMPACT_ARRAY);
 
         // 7. Topic authorized operations (int32)
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(Integer.MIN_VALUE).array());
 
         // 8. Tag buffer
-        res.write((byte) 0);
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
     }
 
     public static void writePartitionResponse(ByteArrayOutputStream res, Integer partitionId) throws IOException {
@@ -168,21 +172,21 @@ public class KafkaResponseBuilder {
         res.write(ByteBuffer.allocate(KafkaConstants.INT32_SIZE).putInt(-1).array()); // leader_epoch
 
         // Replica Nodes (empty array)
-        res.write((byte) 1); // compact array size (0 + 1)
+        res.write(KafkaConstants.EMPTY_COMPACT_ARRAY); // compact array size (0 + 1)
 
         // In-Sync Replica Nodes (empty array)
-        res.write((byte) 1);
+        res.write(KafkaConstants.EMPTY_COMPACT_ARRAY);
 
         // Eligible Leader Replicas (empty array)
-        res.write((byte) 1);
+        res.write(KafkaConstants.EMPTY_COMPACT_ARRAY);
 
         // Last Known ELR (empty array)
-        res.write((byte) 1);
+        res.write(KafkaConstants.EMPTY_COMPACT_ARRAY);
 
         // Offline Replicas (empty array)
-        res.write((byte) 1);
+        res.write(KafkaConstants.EMPTY_COMPACT_ARRAY);
 
         // Tag buffer
-        res.write((byte) 0);
+        res.write(KafkaConstants.EMPTY_TAG_BUFFER);
     }
 }
