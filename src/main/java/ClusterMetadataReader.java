@@ -81,7 +81,7 @@ public class ClusterMetadataReader {
                     System.out.println("Key: " + key);
                 }
 
-                int valueLength = zigZagDecodeByte(buffer.get());
+                int valueLength = buffer.getShort();
                 System.out.println("Value length: " + valueLength);
 
                 if (valueLength <= 0) {
@@ -152,13 +152,14 @@ public class ClusterMetadataReader {
                         break;
                 }
 
-                if(topicId != null) {
-                    int start = buffer.position();
-                    byte[] b = new byte[buffer.remaining()];
-                    buffer.get(b);
-                    buffer.position(start);
-                    System.out.println(bytesToHex(b));
-                }
+                // Uncomment the lines below to inspect raw bytes
+//                if(topicId != null) {
+//                    int start = buffer.position();
+//                    byte[] b = new byte[buffer.remaining()];
+//                    buffer.get(b);
+//                    buffer.position(start);
+//                    System.out.println(bytesToHex(b));
+//                }
 
                 System.out.println();
             }
@@ -189,6 +190,7 @@ public class ClusterMetadataReader {
         return result.toString();
     }
 
+    // For debugging purposes
     private static void analyzeUuidOccurrences(byte[] fileBytes, byte[] targetUuid) {
         String fileContent = bytesToHex(fileBytes);
         String uuidStr = bytesToHex(targetUuid).replace(" ", "");
@@ -203,6 +205,6 @@ public class ClusterMetadataReader {
             System.out.println("Found at position: " + (index / 2)); // /2 because hex representation
         }
         System.out.println("Total occurrences: " + count);
-        System.out.println("=======================");
+        System.out.println("=======================\n");
     }
 }
