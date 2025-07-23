@@ -83,7 +83,7 @@ public class KafkaResponseBuilder {
 
         try {
             topicMetadata = ClusterMetadataReader.readTopicMetadata(topicName);
-            System.out.println("Response builder: Topic name: " + topicMetadata.topicName + " Partitions: " + topicMetadata.partitions.size());
+            System.out.println("Response builder- Topic name: " + topicMetadata.topicName + " Partitions: " + topicMetadata.partitions.size());
         } catch (IOException e) {
             System.err.println("Error reading metadata for " + topicName + ": " + e.getMessage());
         }

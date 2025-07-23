@@ -151,6 +151,7 @@ public class ClusterMetadataReader {
 
         if (foundTopicName != null) {
             System.out.println("Final result - Topic: " + foundTopicName + ", Partitions: " + partitions.size());
+            analyzeUuidOccurrences(logs, topicId);
             System.out.println("\ncount: " + countOccurrences(new String(logs), new String(topicId)));
             return new TopicMetadata(foundTopicName, topicId, partitions);
         }
@@ -179,5 +180,22 @@ public class ClusterMetadataReader {
             index += pattern.length();
         }
         return count;
+    }
+
+    private static void analyzeUuidOccurrences(byte[] fileBytes, byte[] targetUuid) {
+        String fileContent = bytesToHex(fileBytes);
+        String uuidStr = bytesToHex(targetUuid).replace(" ", "");
+
+        System.out.println("\n===== UUID ANALYSIS =====");
+        System.out.println("Searching for: " + uuidStr);
+
+        int index = -1;
+        int count = 0;
+        while ((index = fileContent.indexOf(uuidStr, index + 1)) != -1) {
+            count++;
+            System.out.println("Found at position: " + (index / 2)); // /2 because hex representation
+        }
+        System.out.println("Total occurrences: " + count);
+        System.out.println("=======================");
     }
 }
