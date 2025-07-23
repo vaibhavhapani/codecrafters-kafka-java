@@ -84,6 +84,12 @@ public class ClusterMetadataReader {
                 int valueLength = zigZagDecodeByte(buffer.get());
                 System.out.println("Value length: " + valueLength);
 
+                if (valueLength <= 0) {
+                    System.out.println("Skipping record with invalid value length: " + valueLength);
+                    buffer.position(recordEnd);
+                    continue;
+                }
+
                 // Value
                 int frameVersion = buffer.get() & 0xFF;
                 int type = buffer.get() & 0xFF;
@@ -117,6 +123,7 @@ public class ClusterMetadataReader {
                         int taggedFieldsCount = buffer.get() & 0xFF;
                         int headersArrayCount = buffer.get() & 0xFF;
 
+//                        buffer.position(recordEnd);
                         break;
 
                     case KafkaConstants.PARTITION_RECORD:
@@ -136,20 +143,11 @@ public class ClusterMetadataReader {
                         }
 
                         buffer.position(recordEnd);
-
                         break;
                     default:
                         System.out.println("Skipping record type: " + type);
                         buffer.position(recordEnd);
                         break;
-                }
-
-                if(topicId != null) {
-                    int start = buffer.position();
-                    byte[] b = new byte[buffer.remaining()];
-                    buffer.get(b);
-                    buffer.position(start);
-                    System.out.println(bytesToHex(b));
                 }
 
                 System.out.println();
@@ -162,7 +160,6 @@ public class ClusterMetadataReader {
         if (foundTopicName != null) {
             System.out.println("Final result - Topic: " + foundTopicName + ", Partitions: " + partitions.size());
             analyzeUuidOccurrences(logs, topicId);
-            System.out.println("\ncount: " + countOccurrences(new String(logs), new String(topicId)));
             return new TopicMetadata(foundTopicName, topicId, partitions);
         }
 
@@ -180,16 +177,6 @@ public class ClusterMetadataReader {
             result.append(String.format("%02x", b));
         }
         return result.toString();
-    }
-
-    private static int countOccurrences(String content, String pattern) {
-        int count = 0;
-        int index = 0;
-        while ((index = content.indexOf(pattern, index)) != -1) {
-            count++;
-            index += pattern.length();
-        }
-        return count;
     }
 
     private static void analyzeUuidOccurrences(byte[] fileBytes, byte[] targetUuid) {
