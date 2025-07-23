@@ -17,12 +17,6 @@ public class ClusterMetadataReader {
         byte[] topicId = null;
         List<Integer> partitions = new ArrayList<>();
 
-        int start = buffer.position();
-        byte[] metadataBytes = new byte[Math.min(32, buffer.remaining())];
-        buffer.get(metadataBytes);
-        System.out.println("\nmetadata: " + bytesToHex(metadataBytes) + "\n");
-        buffer.position(start);
-
         int i = 0;
         while (buffer.remaining() > 0) {
             long baseOffset = buffer.getLong(); // Base Offset
@@ -157,12 +151,9 @@ public class ClusterMetadataReader {
 
         if (foundTopicName != null) {
             System.out.println("Final result - Topic: " + foundTopicName + ", Partitions: " + partitions.size());
+            System.out.println("\ncount: " + countOccurrences(new String(logs), new String(topicId)));
             return new TopicMetadata(foundTopicName, topicId, partitions);
         }
-
-        String s = new String(metadataBytes);
-        String id = new String(topicId);
-        System.out.println("Check: " + s.contains(id));
 
         return null;
     }
@@ -178,5 +169,15 @@ public class ClusterMetadataReader {
             result.append(String.format("%02x", b));
         }
         return result.toString();
+    }
+
+    private static int countOccurrences(String content, String pattern) {
+        int count = 0;
+        int index = 0;
+        while ((index = content.indexOf(pattern, index)) != -1) {
+            count++;
+            index += pattern.length();
+        }
+        return count;
     }
 }
